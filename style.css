@@ -1,0 +1,640 @@
+/* Extra custom styles */
+.glass {
+    backdrop-filter: blur(6px);
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+body.dark-mode .glass {
+    background-color: rgba(30, 41, 59, 0.7);
+}
+
+.pulse-soft {
+    animation: pulse 2.5s infinite;
+}
+
+/* tiny helper for the circular AQI glow behind the number */
+.aqi-glow {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode .aqi-glow {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Make Chart.js canvas fill parent */
+.chart-area {
+    width: 100%;
+    height: 100%;
+}
+
+/* small responsiveness fix for large numbers */
+.num-xxl {
+    font-size: 3.5rem;
+    line-height: 1;
+}
+
+@media (min-width: 1024px) {
+    .num-xxl {
+        font-size: 4rem;
+    }
+}
+
+/* ============================================
+   DARK MODE - Proper Contrast & Readability
+   ============================================ */
+body.dark-mode {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    color: #e2e8f0 !important;
+}
+
+/* Primary headings - bright white for maximum contrast */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode .text-gray-900 {
+    color: #f8fafc !important;
+}
+
+/* Secondary text - light gray for good readability */
+body.dark-mode p,
+body.dark-mode .text-gray-700,
+body.dark-mode .text-gray-600 {
+    color: #e2e8f0 !important;
+}
+
+/* Muted/helper text */
+body.dark-mode .text-gray-500,
+body.dark-mode .text-sm.text-gray-500 {
+    color: #94a3b8 !important;
+}
+
+/* Labels and form text */
+body.dark-mode label,
+body.dark-mode .text-sm.font-medium {
+    color: #e2e8f0 !important;
+}
+
+/* Accent colors - brightened for dark background */
+body.dark-mode .text-indigo-600 { color: #818cf8 !important; }
+body.dark-mode .text-green-600 { color: #4ade80 !important; }
+body.dark-mode .text-green-500 { color: #22c55e !important; }
+body.dark-mode .text-yellow-600 { color: #fbbf24 !important; }
+body.dark-mode .text-red-600 { color: #f87171 !important; }
+body.dark-mode .text-purple-600 { color: #c084fc !important; }
+body.dark-mode .text-orange-600 { color: #fb923c !important; }
+body.dark-mode .text-blue-600 { color: #60a5fa !important; }
+
+/* Cards and containers */
+body.dark-mode .bg-white {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .rounded-2xl.shadow-lg {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .border-gray-100 {
+    border-color: #334155 !important;
+}
+
+/* Header bar */
+body.dark-mode .bg-white.shadow-sm.border-b {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+/* Gradient backgrounds for info cards - darker versions */
+body.dark-mode .bg-gradient-to-br.from-blue-50.to-blue-100 {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%) !important;
+}
+body.dark-mode .bg-gradient-to-br.from-orange-50.to-orange-100 {
+    background: linear-gradient(135deg, #7c2d12 0%, #9a3412 100%) !important;
+}
+body.dark-mode .bg-gradient-to-br.from-purple-50.to-purple-100 {
+    background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%) !important;
+}
+
+/* User profile badge area */
+body.dark-mode .bg-gradient-to-r.from-indigo-50.to-blue-50 {
+    background: linear-gradient(90deg, #312e81 0%, #1e3a8a 100%) !important;
+}
+body.dark-mode .border-indigo-100 {
+    border-color: #4338ca !important;
+}
+
+/* Filter status and energy cards */
+body.dark-mode .bg-gradient-to-r.from-indigo-50.to-blue-50.rounded-xl {
+    background: linear-gradient(90deg, #312e81 0%, #1e3a8a 100%) !important;
+}
+body.dark-mode .bg-gradient-to-r.from-purple-50.to-pink-50 {
+    background: linear-gradient(90deg, #4c1d95 0%, #831843 100%) !important;
+}
+
+/* Recommendation styles removed */
+
+/* Auth screen overrides */
+body.dark-mode #authScreen {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%) !important;
+}
+
+body.dark-mode #authScreen .bg-white {
+    background-color: #1e293b !important;
+}
+
+body.dark-mode #authScreen .bg-gradient-to-r.from-blue-600.to-indigo-700 {
+    background: linear-gradient(90deg, #1e40af 0%, #4338ca 100%) !important;
+}
+
+/* Auth tabs */
+body.dark-mode #authScreen .bg-gray-100 {
+    background-color: #334155 !important;
+}
+body.dark-mode #authScreen .bg-white.text-indigo-600 {
+    background-color: #4338ca !important;
+    color: #e0e7ff !important;
+}
+body.dark-mode #authScreen .text-gray-600 {
+    color: #94a3b8 !important;
+}
+
+/* Inputs */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+    border-color: #475569 !important;
+}
+body.dark-mode input:focus,
+body.dark-mode textarea:focus {
+    border-color: #6366f1 !important;
+}
+body.dark-mode ::placeholder {
+    color: #64748b !important;
+}
+
+/* Chart mode buttons */
+body.dark-mode .modeBtn.bg-gray-100 {
+    background-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode .modeBtn:hover {
+    background-color: #475569 !important;
+}
+
+/* Progress bar background */
+body.dark-mode .bg-gray-200 {
+    background-color: #475569 !important;
+}
+
+/* AQI Badge - ensure high contrast */
+body.dark-mode #aqiBadge {
+    font-weight: 600 !important;
+}
+
+/* Link colors */
+body.dark-mode a,
+body.dark-mode .text-indigo-600.font-semibold {
+    color: #a5b4fc !important;
+}
+body.dark-mode a:hover,
+body.dark-mode .hover\:text-indigo-800:hover {
+    color: #c7d2fe !important;
+}
+
+/* Blue 100 text for auth screen subtitle */
+body.dark-mode .text-blue-100 {
+    color: #bfdbfe !important;
+}
+
+/* Chart area transparency */
+body.dark-mode .chart-area {
+    background: transparent !important;
+}
+
+/* Notifications dropdown and badge */
+#notifPanel {
+    background: #ffffff;
+}
+#notifList div { background: transparent; }
+
+body.dark-mode #notifPanel {
+    background: #0f172a !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+body.dark-mode #notifPanel .border-b { border-color: #1f2937 !important; }
+body.dark-mode #notifPanel .text-gray-400 { color: #94a3b8 !important; }
+
+#notifCount { font-weight: 600; }
+
+/* make bell and icons inherit current color so SVGs switch with theme */
+#notifBtn { color: #374151; }
+body.dark-mode #notifBtn { color: #e2e8f0 !important; }
+
+/* Constrain the badge so it cannot grow large and hide the bell icon */
+#notifCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem; /* about 20px */
+    max-width: 3rem; /* cap width for numbers */
+    height: 1.25rem;
+    padding: 0 0.35rem;
+    font-size: 0.65rem;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+}
+/* position the badge slightly outside the bell so it doesn't cover the icon */
+#notifCount {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    z-index: 60;
+    border-radius: 999px;
+}
+
+/* Notification item styling */
+#notifList .px-2 { border-color: #e5e7eb; }
+body.dark-mode #notifList .px-2 { border-color: #1f2937 !important; }
+
+/* Badge color adjustments */
+#notifCount { background-color: #ef4444; color: #fff; }
+body.dark-mode #notifCount { background-color: #f87171 !important; color: #fff !important; }
+
+/* ============================================
+   LIGHT MODE - Default (No changes needed, 
+   keeping original Tailwind styling)
+   ============================================ */
+
+/* Ensure light mode removes dark overrides */
+body:not(.dark-mode) {
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #eef2ff 100%);
+    color: #1f2937;
+}
+
+/* Filter progress bar smooth animation */
+#filterBar {
+    transition: width 800ms cubic-bezier(.2,.9,.2,1), box-shadow 400ms ease;
+}
+
+/* Subtle enter glow when animating up */
+.filter-anim {
+    box-shadow: 0 6px 18px rgba(34,197,94,0.14);
+}
+/* Ensure Tailwind's .hidden or other code can actually hide the ID-based badge
+   (we previously used an ID rule which overrode the .hidden class). */
+#notifCount.hidden {
+    display: none !important;
+}
+
+/* Range picker panel styling - compact and theme-aware */
+#rangePanel {
+    /* increased width so dropdown has room for presets and date inputs */
+    width: 340px;
+    max-width: 92vw;
+    font-size: 0.9rem;
+    background: #ffffff;
+    color: #1f2937;
+    border-color: #e5e7eb;
+}
+body.dark-mode #rangePanel {
+    background: #0b1220 !important;
+    color: #e2e8f0 !important;
+    border-color: #233043 !important;
+}
+
+/* make quick range buttons smaller and compact */
+.rangeBtn { font-size: 0.875rem; padding: 6px 8px; border-radius: 6px; }
+
+/* date inputs inside range panel */
+#rangePanel input[type="date"] {
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid #e5e7eb;
+    padding: 6px 8px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+body.dark-mode #rangePanel input[type="date"] {
+    background: #0f172a !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+/* Theme-aware hover/focus for quick ranges inside the panel */
+#rangePanel .rangeBtn:hover,
+#rangePanel .rangeBtn:focus {
+    background: #f3f4f6; /* light mode hover */
+    color: #111827;
+}
+body.dark-mode #rangePanel .rangeBtn:hover,
+body.dark-mode #rangePanel .rangeBtn:focus {
+    background: #111827 !important; /* dark mode hover */
+    color: #e2e8f0 !important;
+}
+
+/* make sure the preset buttons have clear focus outline for accessibility */
+#rangePanel .rangeBtn:focus {
+    outline: 2px solid rgba(99,102,241,0.15);
+    outline-offset: 2px;
+}
+
+/* compact panel paddings and sizes */
+#rangePanel .p-3 { padding: 10px; }
+#rangePanel .px-3 { padding-left: 10px; padding-right: 10px; }
+
+/* smaller button label */
+#rangePickerBtn { padding: 6px 10px; font-size: 0.9rem; }
+#rangeLabel { font-size: 0.9rem; }
+
+/* Make the range picker button reflect the active theme before opening the panel */
+#rangePickerBtn {
+    background: #f3f4f6; /* light mode background to match Tailwind's gray-100 */
+    color: #111827;
+    border: 1px solid #e5e7eb;
+}
+#rangePickerBtn svg { color: inherit; }
+
+/* Hover styles tuned for both themes */
+#rangePickerBtn:hover { background: #e5e7eb; }
+
+/* Dark mode button appearance */
+body.dark-mode #rangePickerBtn {
+    background: #0b1220 !important;
+    color: #e2e8f0 !important;
+    border-color: #233043 !important;
+}
+body.dark-mode #rangePickerBtn:hover { background: #111827 !important; }
+
+/* ensure panel sits above other elements when open */
+#rangePanel { z-index: 70; }
+
+/* ============================================
+   ADDITIONAL DARK MODE ENHANCEMENTS
+   ============================================ */
+
+/* Buttons - ensure all buttons work in dark mode */
+body.dark-mode button {
+    transition: all 0.2s ease;
+}
+
+body.dark-mode .bg-gray-100 {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .bg-gray-200 {
+    background-color: #334155 !important;
+}
+
+body.dark-mode .hover\:bg-gray-200:hover {
+    background-color: #475569 !important;
+}
+
+/* Border colors */
+body.dark-mode .border-gray-200 {
+    border-color: #334155 !important;
+}
+
+body.dark-mode .border-gray-300 {
+    border-color: #475569 !important;
+}
+
+/* Shadow adjustments for dark mode */
+body.dark-mode .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Chart section range picker button */
+body.dark-mode .bg-gray-100.rounded-lg {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .bg-gray-100.rounded-lg:hover {
+    background-color: #334155 !important;
+}
+
+/* Range panel buttons active state */
+body.dark-mode .rangeBtn.bg-gradient-to-r.from-blue-500.to-indigo-600 {
+    background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%) !important;
+}
+
+/* Chart section panel */
+body.dark-mode .bg-white.rounded-lg.shadow-lg.border {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Notification panel in Header component */
+body.dark-mode .bg-white.rounded-lg.shadow-lg.border.border-gray-100 {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .border-gray-100 {
+    border-color: #334155 !important;
+}
+
+/* Text colors in notification panel */
+body.dark-mode .text-gray-700 {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .text-gray-600 {
+    color: #cbd5e1 !important;
+}
+
+/* Auth screen form inputs */
+body.dark-mode .border-gray-300.rounded-xl {
+    border-color: #475569 !important;
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .border-gray-300.rounded-xl:focus {
+    border-color: #6366f1 !important;
+    background-color: #0f172a !important;
+}
+
+/* Auth screen toggle buttons */
+body.dark-mode .bg-gray-100.p-1.rounded-xl {
+    background-color: #334155 !important;
+}
+
+body.dark-mode .bg-white.text-indigo-600.shadow-md {
+    background-color: #4338ca !important;
+    color: #e0e7ff !important;
+}
+
+/* Power button in DeviceControl */
+body.dark-mode .bg-gradient-to-br.from-gray-300.to-gray-400 {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%) !important;
+}
+
+/* Filter and energy cards text */
+body.dark-mode .text-gray-700 {
+    color: #e2e8f0 !important;
+}
+
+/* Chart section range picker dropdown */
+body.dark-mode .text-gray-700.hover\:bg-gray-100 {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .text-gray-700.hover\:bg-gray-100:hover {
+    background-color: #334155 !important;
+}
+
+/* Date input styling */
+body.dark-mode input[type="date"] {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+    border-color: #475569 !important;
+}
+
+body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.7;
+}
+
+/* SVG icons - ensure they're visible */
+body.dark-mode svg[stroke="#9ca3af"] {
+    stroke: #94a3b8 !important;
+}
+
+body.dark-mode svg[stroke="#374151"] {
+    stroke: #cbd5e1 !important;
+}
+
+/* Live indicator */
+body.dark-mode .text-gray-600 {
+    color: #cbd5e1 !important;
+}
+
+/* AQI card large number */
+body.dark-mode .text-gray-900 {
+    color: #f8fafc !important;
+}
+
+/* Smooth transitions for theme switching */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Additional component-specific dark mode styles */
+
+/* Chart section range picker button text */
+body.dark-mode .text-gray-700 {
+    color: #e2e8f0 !important;
+}
+
+/* Chart section range picker button hover */
+body.dark-mode .bg-gray-100.rounded-lg.text-gray-700:hover {
+    background-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Range panel custom date labels */
+body.dark-mode .text-xs.text-gray-500 {
+    color: #94a3b8 !important;
+}
+
+/* Range panel cancel button */
+body.dark-mode .text-sm.text-gray-600 {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .text-sm.text-gray-600:hover {
+    color: #e2e8f0 !important;
+}
+
+/* Chart section border */
+body.dark-mode .border.border-gray-100 {
+    border-color: #334155 !important;
+}
+
+/* Auth screen submit button - ensure it's visible */
+body.dark-mode .bg-gradient-to-r.from-blue-600.to-indigo-700 {
+    background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%) !important;
+}
+
+body.dark-mode .bg-gradient-to-r.from-blue-600.to-indigo-700:hover {
+    background: linear-gradient(90deg, #2563eb 0%, #4f46e5 100%) !important;
+}
+
+/* Auth screen link button */
+body.dark-mode .text-indigo-600.font-semibold.hover\:text-indigo-800 {
+    color: #818cf8 !important;
+}
+
+body.dark-mode .text-indigo-600.font-semibold.hover\:text-indigo-800:hover {
+    color: #a5b4fc !important;
+}
+
+/* Ensure all gradient buttons work in dark mode */
+body.dark-mode .bg-gradient-to-r.from-blue-500.to-indigo-600 {
+    background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%) !important;
+}
+
+/* Header notification panel text */
+body.dark-mode .text-center.text-xs.text-gray-500 {
+    color: #94a3b8 !important;
+}
+
+/* Header notification item border */
+body.dark-mode .border-b.border-gray-100 {
+    border-color: #334155 !important;
+}
+
+/* Header notification panel footer */
+body.dark-mode .border-t {
+    border-color: #334155 !important;
+}
+
+/* Ensure icons in header are visible */
+body.dark-mode .text-gray-600 {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .text-gray-600:hover {
+    color: #e2e8f0 !important;
+}
+
+/* Logout button */
+body.dark-mode .text-red-600 {
+    color: #f87171 !important;
+}
+
+body.dark-mode .text-red-600:hover {
+    color: #fca5a5 !important;
+}
+
+/* Live indicator */
+body.dark-mode .text-sm.font-medium.text-gray-600 {
+    color: #cbd5e1 !important;
+}
+
+/* User name in header */
+body.dark-mode .font-semibold.text-gray-900 {
+    color: #f8fafc !important;
+}
