@@ -1,6 +1,6 @@
-import { useRef, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
-function Header({ userName, onLogout, theme, onThemeToggle, notifications, unreadCount, showNotifPanel, onToggleNotifPanel, onClearNotifications, isPurifierOn, instructionsAccepted, onOpenInstructions }) {
+function Header({ session, supabase, theme, onThemeToggle, notifications, unreadCount, showNotifPanel, onToggleNotifPanel, onClearNotifications, isPurifierOn, openInstructions }) {
     const notifPanelRef = useRef(null);
     const notifBtnRef = useRef(null);
 
@@ -21,6 +21,10 @@ function Header({ userName, onLogout, theme, onThemeToggle, notifications, unrea
         return () => document.removeEventListener('click', handleClickOutside);
     }, [showNotifPanel, onToggleNotifPanel]);
 
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+    };
+
     const svgMoon = (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -35,7 +39,7 @@ function Header({ userName, onLogout, theme, onThemeToggle, notifications, unrea
     );
 
     return (
-        <div className="bg-white shadow-sm border-b">
+        <div className="header-bg shadow-sm border-b">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 relative">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -108,7 +112,9 @@ function Header({ userName, onLogout, theme, onThemeToggle, notifications, unrea
                                     />
                                 </svg>
                             </div>
-                            <span className="font-semibold text-gray-900">{userName}</span>
+                            <span className="font-semibold text-gray-900" title={session.user.user_metadata.full_name || session.user.email}>
+                                {session.user.user_metadata.full_name || session.user.email}
+                            </span>
 
                             {/* Notification bell */}
                             <button
@@ -172,18 +178,16 @@ function Header({ userName, onLogout, theme, onThemeToggle, notifications, unrea
                                 </div>
                             )}
 
-                            {instructionsAccepted && (
-                                <button
-                                    onClick={() => onOpenInstructions(true)}
-                                    className="text-gray-600 hover:text-gray-800 transition mr-2"
-                                    title="Instructions"
-                                >
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" stroke="#6b7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                                        <path d="M11 10h2v6h-2zM12 7h.01" stroke="#6b7280" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </button>
-                            )}
+                            <button
+                                onClick={() => openInstructions(true)}
+                                className="text-gray-600 hover:text-gray-800 transition mr-2"
+                                title="Instructions"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" stroke="#6b7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M11 10h2v6h-2zM12 7h.01" stroke="#6b7280" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
                             <button
                                 onClick={onThemeToggle}
                                 className="text-gray-600 hover:text-gray-800 transition mr-2"
@@ -194,7 +198,7 @@ function Header({ userName, onLogout, theme, onThemeToggle, notifications, unrea
                             >
                                 {theme === 'dark' ? svgSun : svgMoon}
                             </button>
-                            <button onClick={onLogout} className="text-red-600 hover:text-red-800 transition" title="Logout">
+                            <button onClick={handleLogout} className="text-red-600 hover:text-red-800 transition" title="Logout">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                                     <path
                                         d="M16 17l5-5-5-5"

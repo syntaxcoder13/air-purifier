@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { saveInstructionsAccepted } from '../utils/storage';
 
-function InstructionsModal({ isOpen, readOnly = false, onAccept, onClose, theme = 'dark' }) {
+function InstructionsModal({ showInstructions, readOnly = false, onClose, theme = 'dark' }) {
     const [checked, setChecked] = useState(false);
 
     const isDark = theme === 'dark';
@@ -9,7 +10,12 @@ function InstructionsModal({ isOpen, readOnly = false, onAccept, onClose, theme 
     const cardBorder = isDark ? 'border border-slate-700' : 'border border-gray-100';
     const importantBg = isDark ? 'bg-indigo-900/30 border-l-4 border-indigo-400 text-indigo-200' : 'bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700';
 
-    if (!isOpen) return null;
+    if (!showInstructions) return null;
+
+    const handleAccept = () => {
+        saveInstructionsAccepted(true);
+        onClose();
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -84,7 +90,7 @@ function InstructionsModal({ isOpen, readOnly = false, onAccept, onClose, theme 
                             <h4 className="text-sm font-medium">More details</h4>
                             <div className={`text-sm mt-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                                 <p>When both Bluetooth and WiFi are off, the dashboard disables power control to avoid inconsistent states. If connectivity returns, you can resume control.</p>
-                                <p className="mt-2">Power control actions are only accepted when the device reports at least one active connectivity channel. The UI will show a clear message and disable the control when the device is offline.</p>
+                                <p className="mt-2">Power control actions are only accepted when the device rerts at least one active connectivity channel. The UI will show a clear message and disable the control when the device is offline.</p>
                                 <p className="mt-2">Notifications are delivered to the bell icon and unread counts increase while the panel is closed. Check the notifications panel to review recent alerts and device recommendations.</p>
                             </div>
                         </div>
@@ -114,7 +120,7 @@ function InstructionsModal({ isOpen, readOnly = false, onAccept, onClose, theme 
                         </button>
                     ) : (
                         <button
-                            onClick={onAccept}
+                            onClick={handleAccept}
                             disabled={!checked}
                             className={`px-4 py-2 rounded-lg text-white ${checked ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-300 cursor-not-allowed'}`}
                         >

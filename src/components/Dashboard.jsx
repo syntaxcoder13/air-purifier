@@ -5,7 +5,7 @@ import DeviceControl from './DeviceControl';
 import ChartSection from './ChartSection';
 import { getChartDataset } from '../utils/chartData';
 
-function Dashboard({ userName, onLogout, theme, onThemeToggle, instructionsAccepted, onOpenInstructions }) {
+function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }) {
     const [currentAQI, setCurrentAQI] = useState(156);
     const [isPurifierOn, setIsPurifierOn] = useState(false);
     const [temperature, setTemperature] = useState(28);
@@ -293,8 +293,8 @@ function Dashboard({ userName, onLogout, theme, onThemeToggle, instructionsAccep
     return (
         <div className="min-h-screen">
             <Header
-                userName={userName}
-                onLogout={onLogout}
+                session={session}
+                supabase={supabase}
                 theme={theme}
                 onThemeToggle={onThemeToggle}
                 notifications={notifications}
@@ -303,8 +303,7 @@ function Dashboard({ userName, onLogout, theme, onThemeToggle, instructionsAccep
                 onToggleNotifPanel={toggleNotifPanel}
                 onClearNotifications={clearNotifications}
                 isPurifierOn={isPurifierOn}
-                instructionsAccepted={instructionsAccepted}
-                onOpenInstructions={onOpenInstructions}
+                openInstructions={openInstructions}
             />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

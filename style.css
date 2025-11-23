@@ -101,7 +101,10 @@ body.dark-mode .border-gray-100 {
 }
 
 /* Header bar */
-body.dark-mode .bg-white.shadow-sm.border-b {
+.header-bg {
+    background-color: #f8fafc !important;
+}
+body.dark-mode .header-bg {
     background-color: #0f172a !important;
     border-color: #334155 !important;
 }

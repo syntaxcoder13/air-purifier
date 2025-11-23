@@ -1,29 +1,45 @@
 import { useState, useEffect } from 'react';
+import { supabase } from './supabaseClient';
 import AuthScreen from './components/AuthScreen';
 import Dashboard from './components/Dashboard';
 import InstructionsModal from './components/InstructionsModal';
-import { loadAuth, saveAuth, loadTheme, saveTheme, saveInstructionsAcceptedSession, loadInstructionsAcceptedSession } from './utils/storage';
+import ResetPasswordScreen from './components/ResetPasswordScreen';
+import { loadTheme, saveTheme, saveInstructionsAccepted, loadInstructionsAccepted } from './utils/storage';
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userName, setUserName] = useState('');
+    const [session, setSession] = useState(null);
     const [theme, setTheme] = useState('dark');
+    const [showInstructions, setShowInstructions] = useState(false);
+    const [modalReadOnly, setModalReadOnly] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [isResetPassword, setIsResetPassword] = useState(false);
 
     useEffect(() => {
-        // Load auth state
-        const auth = loadAuth();
-        if (auth && auth.isLoggedIn) {
-            setIsLoggedIn(true);
-            setUserName(auth.userName);
-        }
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+            setLoading(false);
+            if (session) {
+                const instructionsAccepted = loadInstructionsAccepted();
+                if (!instructionsAccepted) {
+                    setShowInstructions(true);
+                    setModalReadOnly(false);
+                }
+            }
+        });
 
-        // Restore session-scoped acceptance so the info icon remains across refreshes
-        const sessionAccepted = loadInstructionsAcceptedSession();
-        setInstructionsAccepted(!!sessionAccepted);
         // Load theme
         const savedTheme = loadTheme();
         setTheme(savedTheme);
         applyTheme(savedTheme);
+
+        // Check for password reset token
+        const hash = window.location.hash;
+        if (hash.includes('access_token=')) {
+            setIsResetPassword(true);
+        }
+
+
+        return () => subscription.unsubscribe();
     }, []);
 
     const applyTheme = (newTheme) => {
@@ -34,23 +50,6 @@ function App() {
         }
     };
 
-    const handleLogin = (name) => {
-        setIsLoggedIn(true);
-        setUserName(name);
-        saveAuth(true, name);
-        // For now show instructions modal every time after login (session-only)
-        // Keep session acceptance separate so the info icon persists across refresh
-        setInstructionsAccepted((prev) => prev);
-        setShowInstructionsModal(true);
-        setModalReadOnly(false);
-    };
-
-    const handleLogout = () => {
-        setIsLoggedIn(false);
-        setUserName('');
-        saveAuth(false, '');
-    };
-
     const handleThemeToggle = () => {
         const newTheme = theme === 'dark' ? 'light' : 'dark';
         setTheme(newTheme);
@@ -58,21 +57,25 @@ function App() {
         applyTheme(newTheme);
     };
 
-    const [instructionsAccepted, setInstructionsAccepted] = useState(false);
-    const [showInstructionsModal, setShowInstructionsModal] = useState(false);
-    const [modalReadOnly, setModalReadOnly] = useState(false);
-
     const handleAcceptInstructions = () => {
-        // Persist acceptance for this browser tab/session only so the info icon survives refresh
-        saveInstructionsAcceptedSession(true);
-        setInstructionsAccepted(true);
-        setShowInstructionsModal(false);
+        saveInstructionsAccepted(true);
+        setShowInstructions(false);
     };
+
+
 
     const openInstructions = (readOnly = true) => {
         setModalReadOnly(readOnly);
-        setShowInstructionsModal(true);
+        setShowInstructions(true);
     };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (isResetPassword) {
+        return <ResetPasswordScreen theme={theme} />;
+    }
 
     return (
         <div className={`min-h-screen antialiased transition-colors duration-300 ${
@@ -80,30 +83,27 @@ function App() {
                 ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-gray-100' 
                 : 'bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-gray-800'
         }`}>
-            {isLoggedIn ? (
-                <>
-                    <Dashboard
-                        userName={userName}
-                        onLogout={handleLogout}
-                        theme={theme}
-                        onThemeToggle={handleThemeToggle}
-                        instructionsAccepted={instructionsAccepted}
-                        onOpenInstructions={openInstructions}
-                    />
-                    <InstructionsModal
-                        isOpen={showInstructionsModal}
-                        readOnly={modalReadOnly}
-                        onAccept={handleAcceptInstructions}
-                        onClose={() => setShowInstructionsModal(false)}
-                        theme={theme}
-                    />
-                </>
+            {(!session || !session.user) ? (
+                <AuthScreen theme={theme} />
             ) : (
-                <AuthScreen onLogin={handleLogin} theme={theme} />
+                <Dashboard 
+                    theme={theme}
+                    handleThemeToggle={handleThemeToggle}
+                    openInstructions={openInstructions}
+                    session={session} 
+                    supabase={supabase}
+                />
+            )}
+            {showInstructions && (
+                <InstructionsModal 
+                    showInstructions={showInstructions}
+                    onClose={() => setShowInstructions(false)}
+                    readOnly={modalReadOnly}
+                    theme={theme}
+                />
             )}
         </div>
     );
 }
 
 export default App;
-

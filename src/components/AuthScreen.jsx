@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { supabase } from '../supabaseClient';
 
-function AuthScreen({ onLogin, theme }) {
+function AuthScreen({ theme }) {
     const [isSignUp, setIsSignUp] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
@@ -9,6 +10,10 @@ function AuthScreen({ onLogin, theme }) {
         password: '',
         confirm: ''
     });
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
+    const [emailSent, setEmailSent] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
 
     const handleInputChange = (e) => {
         setFormData({
@@ -17,36 +22,160 @@ function AuthScreen({ onLogin, theme }) {
         });
     };
 
-    const handleSubmit = (e) => {
+    const validatePassword = (password) => {
+        const hasNumber = /\d/;
+        const hasAlphabet = /[a-zA-Z]/;
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+        return hasNumber.test(password) && hasAlphabet.test(password) && hasSpecialChar.test(password);
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const { name, email, password, confirm } = formData;
+        setLoading(true);
+        setMessage('');
+        const { email, password, confirm } = formData;
 
         if (isSignUp) {
-            if (!name || !email || !password) {
-                alert('Please fill all fields!');
-                return;
-            }
             if (password !== confirm) {
-                alert('Passwords do not match!');
+                setMessage('Passwords do not match!');
+                setLoading(false);
                 return;
             }
-            onLogin(name);
+            if (!validatePassword(password)) {
+                setMessage('Password must contain at least one number, one alphabet, and one special character.');
+                setLoading(false);
+                return;
+            }
+            const { error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: formData.name,
+                    },
+                },
+            });
+            if (error) {
+                setMessage(error.message);
+            } else {
+                setMessage('Success! Please check your email for a verification link.');
+                setEmailSent(true);
+            }
         } else {
-            if (!email || !password) {
-                alert('Please fill all fields!');
-                return;
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                setMessage(error.message);
             }
-            const userName = email.split('@')[0] || 'user';
-            onLogin(userName);
+            // onLogin will be handled by the listener in App.jsx
         }
+        setLoading(false);
+    };
 
-        // Clear form
-        setFormData({ name: '', email: '', password: '', confirm: '' });
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
+        const { email } = formData;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin,
+        });
+        if (error) {
+            setMessage(error.message);
+        } else {
+            setMessage('Password reset link sent! Please check your email.');
+        }
+        setLoading(false);
     };
 
     const togglePassword = () => {
         setShowPassword(!showPassword);
     };
+
+    if (emailSent) {
+        return (
+            <div
+                id="authScreen"
+                className="min-h-screen bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 flex items-center justify-center p-4 relative"
+            >
+                <div className="absolute inset-0 bg-black opacity-20"></div>
+
+                <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden p-8 text-center">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-4">Check your email</h1>
+                    <p className="text-gray-600">
+                        We've sent a verification link to <strong>{formData.email}</strong>. Please check your inbox and follow the link to complete your registration.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (showForgotPassword) {
+        return (
+            <div
+                id="authScreen"
+                className="min-h-screen bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 flex items-center justify-center p-4 relative"
+            >
+                <div className="absolute inset-0 bg-black opacity-20"></div>
+
+                <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden p-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-4 text-center">Forgot Password</h1>
+                    {message && <p className="text-center text-red-500 mb-4">{message}</p>}
+                    <form className="space-y-4" onSubmit={handleForgotPassword}>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <div className="relative">
+                                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                        <path
+                                            d="M3 8l9 6 9-6"
+                                            stroke="#9ca3af"
+                                            strokeWidth="1.2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                        <path
+                                            d="M21 8v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"
+                                            stroke="#9ca3af"
+                                            strokeWidth="1.2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </div>
+                                <input
+                                    id="emailInput"
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                                    placeholder="your@email.com"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-800 transform hover:scale-[1.02] transition-all shadow-lg hover:shadow-xl disabled:opacity-75 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Processing...' : 'Send Reset Link'}
+                        </button>
+                    </form>
+                    <div className="mt-8 text-center">
+                        <p className="text-sm text-gray-600">
+                            <button
+                                onClick={() => setShowForgotPassword(false)}
+                                className="text-indigo-600 font-semibold hover:text-indigo-800 ml-1"
+                            >
+                                Back to Login
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
 
     return (
         <div
@@ -116,6 +245,8 @@ function AuthScreen({ onLogin, theme }) {
                         </button>
                     </div>
 
+                    {message && <p className="text-center text-red-500 mb-4">{message}</p>}
+
                     <form id="authForm" className="space-y-4" onSubmit={handleSubmit}>
                         {/* name (signup only) */}
                         {isSignUp && (
@@ -173,12 +304,24 @@ function AuthScreen({ onLogin, theme }) {
                                     onChange={handleInputChange}
                                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                                     placeholder="your@email.com"
+                                    required
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <div className="flex justify-between items-center">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                {!isSignUp && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowForgotPassword(true)}
+                                        className="text-sm text-indigo-600 hover:text-indigo-800"
+                                    >
+                                        Forgot Password?
+                                    </button>
+                                )}
+                            </div>
                             <div className="relative">
                                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -205,6 +348,7 @@ function AuthScreen({ onLogin, theme }) {
                                     onChange={handleInputChange}
                                     className="w-full pl-11 pr-11 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                                     placeholder="••••••••"
+                                    required
                                 />
                                 <button
                                     type="button"
@@ -266,6 +410,7 @@ function AuthScreen({ onLogin, theme }) {
                                         onChange={handleInputChange}
                                         className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                                         placeholder="••••••••"
+                                        required
                                     />
                                 </div>
                             </div>
@@ -273,9 +418,10 @@ function AuthScreen({ onLogin, theme }) {
 
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-800 transform hover:scale-[1.02] transition-all shadow-lg hover:shadow-xl"
+                            disabled={loading}
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-800 transform hover:scale-[1.02] transition-all shadow-lg hover:shadow-xl disabled:opacity-75 disabled:cursor-not-allowed"
                         >
-                            {isSignUp ? 'Create Account' : 'Sign In'}
+                            {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
                         </button>
                     </form>
 
