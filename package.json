@@ -4,7 +4,6 @@
   "description": "Smart Air Purifier Dashboard - React Version",
   "private": true,
   "dependencies": {
-    "@supabase/supabase-js": "^2.84.0",
     "chart.js": "^4.4.0",
     "dotenv": "^17.2.3",
     "react": "^18.2.0",

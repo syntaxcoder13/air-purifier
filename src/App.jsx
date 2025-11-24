@@ -1,45 +1,33 @@
 import { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
-import AuthScreen from './components/AuthScreen';
 import Dashboard from './components/Dashboard';
 import InstructionsModal from './components/InstructionsModal';
-import ResetPasswordScreen from './components/ResetPasswordScreen';
+import NameEntryScreen from './components/NameEntryScreen';
 import { loadTheme, saveTheme, saveInstructionsAccepted, loadInstructionsAccepted } from './utils/storage';
 
 function App() {
-    const [session, setSession] = useState(null);
+    const [user, setUser] = useState(null);
     const [theme, setTheme] = useState('dark');
     const [showInstructions, setShowInstructions] = useState(false);
     const [modalReadOnly, setModalReadOnly] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [isResetPassword, setIsResetPassword] = useState(false);
 
     useEffect(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setLoading(false);
-            if (session) {
-                const instructionsAccepted = loadInstructionsAccepted();
-                if (!instructionsAccepted) {
-                    setShowInstructions(true);
-                    setModalReadOnly(false);
-                }
+        // Check for a saved user in localStorage
+        const savedUser = localStorage.getItem('smart-air-purifier-user');
+        if (savedUser) {
+            setUser(JSON.parse(savedUser));
+            const instructionsAccepted = loadInstructionsAccepted();
+            if (!instructionsAccepted) {
+                setShowInstructions(true);
+                setModalReadOnly(false);
             }
-        });
+        }
+        setLoading(false);
 
         // Load theme
         const savedTheme = loadTheme();
         setTheme(savedTheme);
         applyTheme(savedTheme);
-
-        // Check for password reset token
-        const hash = window.location.hash;
-        if (hash.includes('access_token=') && hash.includes('type=recovery')) {
-            setIsResetPassword(true);
-        }
-
-
-        return () => subscription.unsubscribe();
     }, []);
 
     const applyTheme = (newTheme) => {
@@ -62,7 +50,17 @@ function App() {
         setShowInstructions(false);
     };
 
+    const handleLogin = (name) => {
+        const newUser = { name };
+        setUser(newUser);
+        localStorage.setItem('smart-air-purifier-user', JSON.stringify(newUser));
+    };
 
+    const handleLogout = () => {
+        setUser(null);
+        localStorage.removeItem('smart-air-purifier-user');
+        // Optional: also clear instructions acceptance on logout
+    };
 
     const openInstructions = (readOnly = true) => {
         setModalReadOnly(readOnly);
@@ -73,25 +71,21 @@ function App() {
         return <div>Loading...</div>;
     }
 
-    if (isResetPassword) {
-        return <ResetPasswordScreen theme={theme} />;
-    }
-
     return (
         <div className={`min-h-screen antialiased transition-colors duration-300 ${
             theme === 'dark' 
                 ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-gray-100' 
                 : 'bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-gray-800'
         }`}>
-            {(!session || !session.user) ? (
-                <AuthScreen theme={theme} />
+            {!user ? (
+                <NameEntryScreen onLogin={handleLogin} />
             ) : (
                 <Dashboard 
+                    user={user}
+                    onLogout={handleLogout}
                     theme={theme}
-                    handleThemeToggle={handleThemeToggle}
+                    onThemeToggle={handleThemeToggle}
                     openInstructions={openInstructions}
-                    session={session} 
-                    supabase={supabase}
                 />
             )}
             {showInstructions && (

@@ -53,7 +53,7 @@ function AQICard({ currentAQI, isPurifierOn, temperature, humidity, pm25, filter
                     <div className="relative flex flex-col items-center justify-center w-48 h-48">
                         <div className="text-6xl font-bold text-gray-900 num-xxl">
                             {isPurifierOn ? Math.round(currentAQI) : '-'}
-                        </div>
+                        </div>                                          
                         <div className="text-lg text-gray-600 mt-2">AQI</div>
                         {isPurifierOn && (
                             <div className="flex items-center mt-2">
@@ -172,4 +172,3 @@ function AQICard({ currentAQI, isPurifierOn, temperature, humidity, pm25, filter
 }
 
 export default AQICard;
-

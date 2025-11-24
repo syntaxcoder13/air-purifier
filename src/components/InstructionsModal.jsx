@@ -35,7 +35,7 @@ function InstructionsModal({ showInstructions, readOnly = false, onClose, theme 
                     </div>
                 </div>
 
-                <div className="p-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="p-6 grid grid-cols-1 gap-4 lg:grid-cols-2 max-h-[60vh] overflow-y-auto">
                     <div className="space-y-4">
                         <div className={`${importantBg} p-3 rounded-md`}>
                             <p className="text-sm font-medium">Important</p>

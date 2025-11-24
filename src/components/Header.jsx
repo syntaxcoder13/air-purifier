@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-function Header({ session, supabase, theme, onThemeToggle, notifications, unreadCount, showNotifPanel, onToggleNotifPanel, onClearNotifications, isPurifierOn, openInstructions }) {
+function Header({ user, onLogout, theme, onThemeToggle, notifications, unreadCount, showNotifPanel, onToggleNotifPanel, onClearNotifications, isPurifierOn, openInstructions }) {
     const notifPanelRef = useRef(null);
     const notifBtnRef = useRef(null);
-
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (
@@ -20,10 +21,6 @@ function Header({ session, supabase, theme, onThemeToggle, notifications, unread
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
     }, [showNotifPanel, onToggleNotifPanel]);
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-    };
 
     const svgMoon = (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -42,18 +39,7 @@ function Header({ session, supabase, theme, onThemeToggle, notifications, unread
         <div className="header-bg shadow-sm border-b">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 relative">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        {/* Mobile hamburger: visible on small screens, hidden on md+ */}
-                        <button
-                            onClick={() => { /* placeholder for mobile menu toggle */ }}
-                            className="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-white hover:bg-white/10 mr-2"
-                            aria-label="Open menu"
-                        >
-                            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </button>
-
+                    <div className="flex items-center space-x-4">
                         <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-xl">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                 <path
@@ -70,7 +56,7 @@ function Header({ session, supabase, theme, onThemeToggle, notifications, unread
                             <p className="text-sm text-gray-500">Real-time Air Quality Monitoring</p>
                         </div>
                     </div>
-                    <div className="flex items-center space-x-4">
+                    <div className="hidden md:flex items-center space-x-4">
                         <div className="flex items-center space-x-2">
                             {isPurifierOn ? (
                                 <>
@@ -112,10 +98,17 @@ function Header({ session, supabase, theme, onThemeToggle, notifications, unread
                                     />
                                 </svg>
                             </div>
-                            <span className="font-semibold text-gray-900" title={session.user.user_metadata.full_name || session.user.email}>
-                                {session.user.user_metadata.full_name || session.user.email}
+                            <span className="font-semibold text-gray-900" title={user.name}>
+                                {user.name}
                             </span>
-
+                            <button onClick={onLogout} className="text-red-600 hover:text-red-800 transition" title="Logout">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M16 17l5-5-5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M21 12H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="flex items-center space-x-3 relative">
                             {/* Notification bell */}
                             <button
                                 ref={notifBtnRef}
@@ -198,33 +191,122 @@ function Header({ session, supabase, theme, onThemeToggle, notifications, unread
                             >
                                 {theme === 'dark' ? svgSun : svgMoon}
                             </button>
-                            <button onClick={handleLogout} className="text-red-600 hover:text-red-800 transition" title="Logout">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                    <path
-                                        d="M16 17l5-5-5-5"
-                                        stroke="#ef4444"
-                                        strokeWidth="1.5"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                    <path
-                                        d="M21 12H9"
-                                        stroke="#ef4444"
-                                        strokeWidth="1.5"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                    <path
-                                        d="M13 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h6"
-                                        stroke="#6b7280"
-                                        strokeWidth="1.2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                </svg>
-                            </button>
                         </div>
                     </div>
+
+                    {/* Hamburger Menu Button for Mobile */}
+                    <div className="md:hidden">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className="inline-flex items-center justify-center p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+                            aria-label="Open menu"
+                        >
+                            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* Mobile Menu Panel */}
+                    {isMobileMenuOpen && (
+                        <div className="md:hidden absolute top-full right-4 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-100 z-50">
+                            <div className="p-4 space-y-4">
+                                {/* User Info */}
+                                <div className="flex items-center space-x-3">
+                                    <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-lg">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path
+                                                d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
+                                                stroke="#fff"
+                                                strokeWidth="1.2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <span className="font-semibold text-gray-900 truncate" title={user.name}>
+                                        {user.name}
+                                    </span>
+                                </div>
+
+                                <div className="border-t border-gray-200"></div>
+
+                                {/* Menu Items */}
+                                <div className="space-y-2">
+                                    <button
+                                        onClick={() => { onToggleNotifPanel(); setIsMobileMenuOpen(false); }}
+                                        className="w-full flex items-center justify-between text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100"
+                                    >
+                                        <span>Notifications</span>
+                                        {unreadCount > 0 && (
+                                            <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{unreadCount}</span>
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => { openInstructions(true); setIsMobileMenuOpen(false); }}
+                                        className="w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100"
+                                    >
+                                        Instructions
+                                    </button>
+                                    <button
+                                        onClick={() => { onThemeToggle(); setIsMobileMenuOpen(false); }}
+                                        className="w-full flex items-center justify-between text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100"
+                                    >
+                                        <span>Toggle Theme</span>
+                                        <span>{theme === 'dark' ? svgSun : svgMoon}</span>
+                                    </button>
+                                </div>
+
+                                <div className="border-t border-gray-200"></div>
+
+                                {/* Live/Offline Status */}
+                                <div className="flex items-center justify-between px-3 py-2">
+                                    <span className="text-sm text-gray-600">Device Status</span>
+                                    {isPurifierOn ? (
+                                        <div className="flex items-center space-x-2">
+                                            <svg className="w-4 h-4 text-green-500 animate-pulse" viewBox="0 0 24 24" fill="none">
+                                                <path
+                                                    d="M12 2v20"
+                                                    stroke="#16a34a"
+                                                    strokeWidth="1.5"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
+                                            </svg>
+                                            <span className="text-sm font-medium text-gray-600">Live</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center space-x-2">
+                                            <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none">
+                                                <path
+                                                    d="M12 2v20"
+                                                    stroke="#9ca3af"
+                                                    strokeWidth="1.5"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
+                                            </svg>
+                                            <span className="text-sm font-medium text-gray-500">Offline</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="border-t border-gray-200"></div>
+
+                                {/* Logout Button */}
+                                <button
+                                    onClick={onLogout}
+                                    className="w-full flex items-center space-x-3 text-left px-3 py-2 rounded-md text-red-600 hover:bg-red-50"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                        <path d="M16 17l5-5-5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M21 12H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                    <span>Change User</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -232,4 +314,3 @@ function Header({ session, supabase, theme, onThemeToggle, notifications, unread
 }
 
 export default Header;
-

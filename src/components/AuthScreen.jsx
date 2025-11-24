@@ -55,6 +55,7 @@ function AuthScreen({ theme }) {
                     },
                 },
             });
+
             if (error) {
                 setMessage(error.message);
             } else {

@@ -131,4 +131,3 @@ function DeviceControl({ isPurifierOn, onPowerToggle, isBluetoothOn, onBluetooth
 }
 
 export default DeviceControl;
-

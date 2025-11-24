@@ -5,7 +5,7 @@ import DeviceControl from './DeviceControl';
 import ChartSection from './ChartSection';
 import { getChartDataset } from '../utils/chartData';
 
-function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }) {
+function Dashboard({ user, onLogout, theme, onThemeToggle, openInstructions }) {
     const [currentAQI, setCurrentAQI] = useState(156);
     const [isPurifierOn, setIsPurifierOn] = useState(false);
     const [temperature, setTemperature] = useState(28);
@@ -23,11 +23,7 @@ function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }
     const [showNotifPanel, setShowNotifPanel] = useState(false);
     const prevAQIRef = useRef(currentAQI);
     const lastNotificationRef = useRef({ text: '', time: 0 });
-    const notificationProcessingRef = useRef(false);
-    const unreadCountRef = useRef(0);
-    const showNotifPanelRef = useRef(false);
     const powerToggleProcessingRef = useRef(false);
-    const processedNotificationIdsRef = useRef(new Set());
 
     const dailyData = [
         { label: '00:00', aqi: 145, pm25: 72 },
@@ -58,28 +54,14 @@ function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }
         const saved = JSON.parse(localStorage.getItem('notifications') || '{"items":[],"unread":0}');
         if (saved.items) {
             setNotifications(saved.items);
-            // Mark all existing notifications as processed
-            saved.items.forEach(item => {
-                if (item.id) {
-                    processedNotificationIdsRef.current.add(item.id);
-                }
-            });
-            const savedCount = saved.unread || 0;
-            setUnreadCount(savedCount);
-            unreadCountRef.current = savedCount;
+            setUnreadCount(saved.unread || 0);
         }
-        showNotifPanelRef.current = showNotifPanel;
         
         // Load Bluetooth and WiFi state from localStorage
         const savedConnectivity = JSON.parse(localStorage.getItem('connectivity') || '{"bluetooth":false,"wifi":false}');
         setIsBluetoothOn(savedConnectivity.bluetooth || false);
         setIsWifiOn(savedConnectivity.wifi || false);
     }, []);
-    
-    // Sync showNotifPanel ref when state changes
-    useEffect(() => {
-        showNotifPanelRef.current = showNotifPanel;
-    }, [showNotifPanel]);
 
     // Simulation interval
     useEffect(() => {
@@ -89,7 +71,6 @@ function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }
                     ? Math.max(50, prev - Math.random() * 3)
                     : Math.min(200, prev + Math.random() * 2);
                 
-                // Notify when AQI crosses into high range
                 if (prevAQIRef.current <= 150 && newAQI > 150) {
                     addNotification('AQI spiked to ' + Math.round(newAQI) + ' — consider turning on purifier');
                 }
@@ -109,61 +90,18 @@ function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }
 
     const addNotification = (text) => {
         const now = Date.now();
-        const notificationId = `${text}-${now}`;
-        
-        // Prevent duplicate notifications within 2 seconds
-        if (
-            lastNotificationRef.current.text === text &&
-            now - lastNotificationRef.current.time < 2000
-        ) {
-            return;
-        }
-        
-        // Check if this notification ID has already been processed
-        if (processedNotificationIdsRef.current.has(notificationId)) {
-            return;
-        }
-        
-        // Mark as processing
-        processedNotificationIdsRef.current.add(notificationId);
+        if (lastNotificationRef.current.text === text && now - lastNotificationRef.current.time < 2000) return;
         lastNotificationRef.current = { text, time: now };
         
-        const timeString = new Date().toLocaleTimeString();
-        const newNotif = { text, time: timeString, id: notificationId };
-        
-        // Update notifications
-        setNotifications((prevNotifications) => {
-            // Double check - if notification already exists, don't add
-            const exists = prevNotifications.some(n => n.id === notificationId);
-            if (exists) {
-                processedNotificationIdsRef.current.delete(notificationId);
-                return prevNotifications;
+        const newNotif = { text, time: new Date().toLocaleTimeString() };
+        setNotifications((prev) => {
+            const updated = [...prev, newNotif];
+            let newUnreadCount = unreadCount;
+            if (!showNotifPanel) {
+                newUnreadCount++;
             }
-            
-            const updated = [...prevNotifications, newNotif];
-            
-            // Only increment count if panel is closed (user hasn't seen it yet)
-            let newUnreadCount = unreadCountRef.current;
-            if (!showNotifPanelRef.current) {
-                // Panel is closed, increment by 1 (not from array length to avoid issues)
-                newUnreadCount = unreadCountRef.current + 1;
-            }
-            // If panel is open, don't increment (user is reading)
-            
-            unreadCountRef.current = newUnreadCount;
             setUnreadCount(newUnreadCount);
-            
-            // Save to localStorage
-            localStorage.setItem('notifications', JSON.stringify({ 
-                items: updated, 
-                unread: newUnreadCount 
-            }));
-            
-            // Clean up processed IDs after 5 seconds to prevent memory leak
-            setTimeout(() => {
-                processedNotificationIdsRef.current.delete(notificationId);
-            }, 5000);
-            
+            localStorage.setItem('notifications', JSON.stringify({ items: updated, unread: newUnreadCount }));
             return updated;
         });
     };
@@ -171,57 +109,34 @@ function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }
     const clearNotifications = () => {
         setNotifications([]);
         setUnreadCount(0);
-        unreadCountRef.current = 0;
         setShowNotifPanel(false);
         localStorage.setItem('notifications', JSON.stringify({ items: [], unread: 0 }));
     };
 
     const toggleNotifPanel = () => {
         setShowNotifPanel((prev) => {
-            const newValue = !prev;
-            showNotifPanelRef.current = newValue;
-            
-            if (newValue) {
-                // Panel is opening, reset unread count
+            if (!prev) { // If panel is opening
                 setUnreadCount(0);
-                unreadCountRef.current = 0;
                 localStorage.setItem('notifications', JSON.stringify({ items: notifications, unread: 0 }));
             }
-            return newValue;
+            return !prev;
         });
     };
 
     const handlePowerToggle = () => {
-        // Prevent double processing
-        if (powerToggleProcessingRef.current) {
-            return;
-        }
-        // If trying to turn ON while both connectivity are OFF, block and notify
+        if (powerToggleProcessingRef.current) return;
         if (!isPurifierOn && !isBluetoothOn && !isWifiOn) {
             addNotification('Enable Bluetooth or WiFi before turning ON the purifier');
             return;
         }
-
         powerToggleProcessingRef.current = true;
-
         setIsPurifierOn((prev) => {
-            const newState = !prev;
-            const notificationText = 'Purifier turned ' + (newState ? 'ON' : 'OFF');
-
-            // Add notification immediately with unique timestamp
-            const notificationId = `${notificationText}-${Date.now()}`;
-            addNotification(notificationText);
-
-            // Reset flag after a delay
-            setTimeout(() => {
-                powerToggleProcessingRef.current = false;
-            }, 300);
-
-            return newState;
+            addNotification('Purifier turned ' + (!prev ? 'ON' : 'OFF'));
+            setTimeout(() => { powerToggleProcessingRef.current = false; }, 300);
+            return !prev;
         });
     };
 
-    // If both Bluetooth and WiFi are OFF, ensure purifier is OFF as well
     useEffect(() => {
         if (!isBluetoothOn && !isWifiOn && isPurifierOn) {
             setIsPurifierOn(false);
@@ -230,52 +145,32 @@ function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }
     }, [isBluetoothOn, isWifiOn, isPurifierOn]);
 
     const handleBluetoothToggle = () => {
-        setIsBluetoothOn((prevBluetooth) => {
-            const newBluetoothState = !prevBluetooth;
-            setIsWifiOn((prevWifi) => {
-                const newWifiState = newBluetoothState ? false : prevWifi;
-                
-                if (newBluetoothState) {
-                    // If Bluetooth is turning ON, turn WiFi OFF
-                    addNotification('Bluetooth turned ON - WiFi turned OFF');
-                } else {
-                    addNotification('Bluetooth turned OFF');
-                }
-                
-                // Save to localStorage
-                localStorage.setItem('connectivity', JSON.stringify({ 
-                    bluetooth: newBluetoothState, 
-                    wifi: newWifiState 
-                }));
-                
-                return newWifiState;
-            });
-            return newBluetoothState;
+        setIsBluetoothOn((prev) => {
+            const newState = !prev;
+            if (newState) {
+                setIsWifiOn(false);
+                addNotification('Bluetooth turned ON - WiFi turned OFF');
+                localStorage.setItem('connectivity', JSON.stringify({ bluetooth: true, wifi: false }));
+            } else {
+                addNotification('Bluetooth turned OFF');
+                localStorage.setItem('connectivity', JSON.stringify({ bluetooth: false, wifi: isWifiOn }));
+            }
+            return newState;
         });
     };
 
     const handleWifiToggle = () => {
-        setIsWifiOn((prevWifi) => {
-            const newWifiState = !prevWifi;
-            setIsBluetoothOn((prevBluetooth) => {
-                const newBluetoothState = newWifiState ? false : prevBluetooth;
-                
-                if (newWifiState) {
-                    // If WiFi is turning ON, turn Bluetooth OFF
-                    addNotification('WiFi turned ON - Bluetooth turned OFF');
-                } else {
-                    addNotification('WiFi turned OFF');
-                }
-                
-                // Save to localStorage
-                localStorage.setItem('connectivity', JSON.stringify({ 
-                    bluetooth: newBluetoothState, 
-                    wifi: newWifiState 
-                }));
-                
-                return newBluetoothState;
-            });
-            return newWifiState;
+        setIsWifiOn((prev) => {
+            const newState = !prev;
+            if (newState) {
+                setIsBluetoothOn(false);
+                addNotification('WiFi turned ON - Bluetooth turned OFF');
+                localStorage.setItem('connectivity', JSON.stringify({ bluetooth: false, wifi: true }));
+            } else {
+                addNotification('WiFi turned OFF');
+                localStorage.setItem('connectivity', JSON.stringify({ bluetooth: isBluetoothOn, wifi: false }));
+            }
+            return newState;
         });
     };
 
@@ -293,8 +188,8 @@ function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }
     return (
         <div className="min-h-screen">
             <Header
-                session={session}
-                supabase={supabase}
+                user={user}
+                onLogout={onLogout}
                 theme={theme}
                 onThemeToggle={onThemeToggle}
                 notifications={notifications}
@@ -346,4 +241,3 @@ function Dashboard({ session, supabase, theme, onThemeToggle, openInstructions }
 }
 
 export default Dashboard;
-
