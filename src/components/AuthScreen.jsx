@@ -10,7 +10,7 @@ function AuthScreen({ theme }) {
         password: '',
         confirm: ''
     });
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false); 
     const [message, setMessage] = useState('');
     const [emailSent, setEmailSent] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -77,7 +77,7 @@ function AuthScreen({ theme }) {
         setMessage('');
         const { email } = formData;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin,
+            redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) {
             setMessage(error.message);
@@ -443,4 +443,3 @@ function AuthScreen({ theme }) {
 }
 
 export default AuthScreen;
-

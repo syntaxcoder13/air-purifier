@@ -34,7 +34,7 @@ function App() {
 
         // Check for password reset token
         const hash = window.location.hash;
-        if (hash.includes('access_token=')) {
+        if (hash.includes('access_token=') && hash.includes('type=recovery')) {
             setIsResetPassword(true);
         }
 
