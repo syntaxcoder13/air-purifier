@@ -6,7 +6,7 @@ import ChartSection from './ChartSection';
 import { getChartDataset } from '../utils/chartData';
 
 function Dashboard({ user, onLogout, theme, onThemeToggle, openInstructions }) {
-    const [currentAQI, setCurrentAQI] = useState(156);
+    const [currentAQI, setCurrentAQI] = useState(45);
     const [isPurifierOn, setIsPurifierOn] = useState(false);
     const [temperature, setTemperature] = useState(28);
     const [humidity, setHumidity] = useState(65);
@@ -65,25 +65,36 @@ function Dashboard({ user, onLogout, theme, onThemeToggle, openInstructions }) {
 
     // Simulation interval
     useEffect(() => {
+        if (isPurifierOn) {
+            setCurrentAQI(35 + Math.random() * 15); // Start with 'Good' AQI
+        }
         const interval = setInterval(() => {
-            setCurrentAQI((prev) => {
-                const newAQI = isPurifierOn 
-                    ? Math.max(50, prev - Math.random() * 3)
-                    : Math.min(200, prev + Math.random() * 2);
-                
-                if (prevAQIRef.current <= 150 && newAQI > 150) {
-                    addNotification('AQI spiked to ' + Math.round(newAQI) + ' — consider turning on purifier');
-                }
-                prevAQIRef.current = newAQI;
-                return newAQI;
-            });
-            setPm25((prev) => isPurifierOn 
-                ? Math.max(20, prev - Math.random() * 2)
-                : Math.min(150, prev + Math.random() * 1.5)
-            );
+            if (isPurifierOn) {
+                setCurrentAQI((prev) => {
+                    const newAQI = prev - Math.random() * 2;
+                    return Math.max(10, newAQI); // Ensure AQI doesn't go below a certain point
+                });
+                setPm25((prev) => {
+                    const newPm25 = prev - Math.random() * 1.5;
+                    return Math.max(5, newPm25);
+                });
+            } else {
+                setCurrentAQI((prev) => {
+                    const newAQI = prev + Math.random() * 2;
+                    if (prevAQIRef.current <= 150 && newAQI > 150) {
+                        addNotification('AQI spiked to ' + Math.round(newAQI) + ' — consider turning on purifier');
+                    }
+                    prevAQIRef.current = newAQI;
+                    return Math.min(350, newAQI); // Cap AQI at a max value
+                });
+                setPm25((prev) => {
+                    const newPm25 = prev + Math.random() * 1.5;
+                    return Math.min(200, newPm25);
+                });
+            }
             setTemperature(27 + Math.random() * 3);
             setHumidity(60 + Math.random() * 10);
-        }, 3000);
+        }, 1000);
 
         return () => clearInterval(interval);
     }, [isPurifierOn]);
